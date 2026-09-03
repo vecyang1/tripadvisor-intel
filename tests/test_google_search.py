@@ -8,6 +8,15 @@ SDK_PATH = "/Users/vecsatfoxmailcom/Documents/A-coding/26.09.03-agent-search-sdk
 if os.path.exists(SDK_PATH) and SDK_PATH not in sys.path:
     sys.path.insert(0, SDK_PATH)
 
+if "search_sdk" not in sys.modules:
+    try:
+        import search_sdk
+    except ImportError:
+        import types
+        dummy = types.ModuleType("search_sdk")
+        dummy.search = MagicMock()
+        sys.modules["search_sdk"] = dummy
+
 from tripadvisorintel.transports.google_search import GoogleSearchResolver
 
 
