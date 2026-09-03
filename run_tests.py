@@ -16,6 +16,7 @@ from tests.test_client import TestClient
 from tests.test_cli import TestCLI
 from tests.test_mcp import TestMCPServer
 from tests.test_reviews import TestReviews
+from tests.test_e2e_evolution import TestE2EEvolution
 
 
 def suite():
@@ -28,6 +29,7 @@ def suite():
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestCLI))
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestMCPServer))
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestReviews))
+    s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestE2EEvolution))
     return s
 
 

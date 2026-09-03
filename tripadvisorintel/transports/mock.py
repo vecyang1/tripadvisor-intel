@@ -111,11 +111,20 @@ class MockTransport(BaseTransport):
         offset: int = 0,
         domain: str = "www.tripadvisor.com",
     ) -> Tuple[List[ReviewItem], Optional[str]]:
-        all_revs = list(self.place_detail.reviews_list)
-        # Generate simulated paginated reviews if offset is higher
-        if offset > 0 and len(all_revs) <= offset:
-            for idx in range(offset, offset + limit):
-                all_revs.append(
+        total_available = 100
+        if offset >= total_available:
+            return [], None
+
+        batch_count = min(limit, total_available - offset)
+        page: List[ReviewItem] = []
+        for idx in range(offset, offset + batch_count):
+            if idx < len(self.place_detail.reviews_list):
+                item = self.place_detail.reviews_list[idx].model_copy(deep=True)
+                if not item.review_id:
+                    item.review_id = f"rev_{idx}"
+                page.append(item)
+            else:
+                page.append(
                     ReviewItem(
                         review_id=f"rev_{idx}",
                         title=f"Simulated Review {idx}",
@@ -125,7 +134,6 @@ class MockTransport(BaseTransport):
                         author=ReviewAuthor(username=f"user_{idx}", contributions=idx),
                     )
                 )
-        page = all_revs[offset : offset + limit]
-        has_next = (offset + limit) < 100
-        next_token = f"offset_{offset + limit}" if has_next else None
+        has_next = (offset + batch_count) < total_available
+        next_token = f"offset_{offset + batch_count}" if has_next else None
         return page, next_token

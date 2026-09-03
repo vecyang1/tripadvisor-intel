@@ -15,12 +15,25 @@ class TripAdvisorClient:
     def __init__(
         self,
         transport: Optional[BaseTransport] = None,
+        fallback_transport: Optional[BaseTransport] = None,
         cache_instance: Optional[CacheDB] = None,
         enable_llm: bool = True,
     ):
         self.transport = transport or SerpApiTransport()
+        self.fallback_transport = fallback_transport
         self.cache = cache_instance or cache
         self.enable_llm = enable_llm
+
+    def _execute_with_fallback(self, method_name: str, *args, **kwargs):
+        """Execute method on primary transport, falling back to secondary if blocked."""
+        try:
+            method = getattr(self.transport, method_name)
+            return method(*args, **kwargs)
+        except Exception as err:
+            if self.fallback_transport is not None:
+                fallback_method = getattr(self.fallback_transport, method_name)
+                return fallback_method(*args, **kwargs)
+            raise
 
     def search(
         self,
@@ -36,8 +49,8 @@ class TripAdvisorClient:
             if cached is not None:
                 return [PlaceSummary.model_validate(p) for p in cached][:limit]
 
-        results = self.transport.search_places(
-            query=query, category=category, domain=domain, limit=limit
+        results = self._execute_with_fallback(
+            "search_places", query=query, category=category, domain=domain, limit=limit
         )
         self.cache.set_search(
             query=query,
@@ -65,8 +78,8 @@ class TripAdvisorClient:
                 if reviews_pages <= 1 or cached_reviews >= reviews_pages * 4:
                     return PlaceDetail.model_validate(cached)
 
-        detail = self.transport.get_place_detail(
-            place_id=place_id, domain=domain, reviews_pages=reviews_pages
+        detail = self._execute_with_fallback(
+            "get_place_detail", place_id=place_id, domain=domain, reviews_pages=reviews_pages
         )
         self.cache.set_place(place_id=place_id, detail=detail.model_dump(), domain=domain)
         return detail
@@ -102,8 +115,12 @@ class TripAdvisorClient:
         while len(all_reviews) < max_reviews:
             batch_limit = min(page_size, max_reviews - len(all_reviews))
             try:
-                batch, next_token = self.transport.get_reviews(
-                    place_id=resolved_place_id, limit=batch_limit, offset=offset, domain=domain
+                batch, next_token = self._execute_with_fallback(
+                    "get_reviews",
+                    place_id=resolved_place_id,
+                    limit=batch_limit,
+                    offset=offset,
+                    domain=domain,
                 )
             except Exception:
                 break

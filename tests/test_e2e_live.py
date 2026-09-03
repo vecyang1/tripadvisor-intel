@@ -74,6 +74,18 @@ class TestLiveE2E(unittest.TestCase):
         self.assertGreater(dossier.rating, 4.0)
         self.assertIsNotNone(dossier.authenticity_score)
 
+    def test_live_reviews_pagination_and_storage(self):
+        """Verify live paginated review fetching and SQLite caching on real property."""
+        reviews = self.client.get_reviews("7182682", max_reviews=20)
+        self.assertGreaterEqual(len(reviews), 5)
+        first = reviews[0]
+        self.assertIsNotNone(first.snippet)
+        self.assertGreater(first.rating, 0.0)
+
+        # Verify SQLite cache
+        cached = self.client.cache.get_reviews("7182682", limit=20)
+        self.assertGreaterEqual(len(cached), len(reviews))
+
 
 if __name__ == "__main__":
     unittest.main()
