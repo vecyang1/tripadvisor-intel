@@ -1,14 +1,20 @@
-"""Unit tests for GoogleSearchResolver."""
-
+import os
+import sys
 import unittest
 from unittest.mock import patch, MagicMock
+
+# Ensure agent-search-sdk is discoverable
+SDK_PATH = "/Users/vecsatfoxmailcom/Documents/A-coding/26.09.03-agent-search-sdk"
+if os.path.exists(SDK_PATH) and SDK_PATH not in sys.path:
+    sys.path.insert(0, SDK_PATH)
+
 from tripadvisorintel.transports.google_search import GoogleSearchResolver
 
 
 class TestGoogleSearchResolver(unittest.TestCase):
     def test_resolver_missing_credentials(self):
         resolver = GoogleSearchResolver(api_key=None, cx=None)
-        results = resolver.search_tripadvisor("Monkey Island")
+        results = resolver.search_tripadvisor("Monkey Island", use_agent_sdk=False)
         self.assertEqual(results, [])
 
     @patch("urllib.request.urlopen")
@@ -32,11 +38,28 @@ class TestGoogleSearchResolver(unittest.TestCase):
         mock_urlopen.return_value.__enter__.return_value = mock_resp
 
         resolver = GoogleSearchResolver(api_key="test-key", cx="test-cx")
-        results = resolver.search_tripadvisor("Monkey Island")
+        results = resolver.search_tripadvisor("Monkey Island", use_agent_sdk=False)
         self.assertEqual(len(results), 2)
         self.assertEqual(results[0].place_id, "5979069")
         self.assertEqual(results[0].title, "Monkey Island (Cat Ba) - All You Need to Know BEFORE You Go")
         self.assertEqual(results[1].place_id, "7182682")
+
+    @patch("search_sdk.search")
+    def test_resolver_via_agent_search_sdk(self, mock_search):
+        mock_item = MagicMock()
+        mock_item.title = "Monkey Island - All You SHOULD Know - Tripadvisor"
+        mock_item.url = "https://www.tripadvisor.com/Attraction_Review-g737051-d5979069-Reviews-Monkey_Island.html"
+        mock_item.snippet = "A very beautiful island in Cat Ba"
+
+        mock_resp = MagicMock()
+        mock_resp.results = [mock_item]
+        mock_search.return_value = mock_resp
+
+        resolver = GoogleSearchResolver()
+        results = resolver.search_tripadvisor("Monkey Island")
+        self.assertEqual(len(results), 1)
+        self.assertEqual(results[0].place_id, "5979069")
+        self.assertEqual(results[0].title, "Monkey Island - All You SHOULD Know")
 
 
 if __name__ == "__main__":

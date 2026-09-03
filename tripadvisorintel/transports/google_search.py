@@ -23,8 +23,43 @@ class GoogleSearchResolver:
         self.cx = cx
         self.timeout = timeout
 
-    def search_tripadvisor(self, query: str, limit: int = 5) -> List[PlaceSummary]:
-        """Search Google for TripAdvisor listings matching query."""
+    def search_tripadvisor(self, query: str, limit: int = 5, use_agent_sdk: bool = True) -> List[PlaceSummary]:
+        """Search for TripAdvisor listings matching query via agent-search-sdk cascade or Google CSE."""
+        results: List[PlaceSummary] = []
+
+        # 1. Try agent-search-sdk cascade first (Brave -> Tavily -> SerpApi -> DuckDuckGo)
+        if use_agent_sdk:
+            try:
+                sdk_paths = [
+                    "/Users/vecsatfoxmailcom/Documents/A-coding/26.09.03-agent-search-sdk",
+                ]
+                import sys
+                for p in sdk_paths:
+                    if p not in sys.path:
+                        sys.path.insert(0, p)
+                from search_sdk import search as agent_search  # type: ignore
+
+                sdk_resp = agent_search(query, domain="tripadvisor.com", limit=limit)
+                for item in sdk_resp.results:
+                    match = re.search(r"-d(\d+)-", item.url)
+                    if match:
+                        place_id = match.group(1)
+                        clean_title = re.sub(r"\s*-\s*Tripadvisor.*$", "", item.title, flags=re.IGNORECASE)
+                        results.append(
+                            PlaceSummary(
+                                position=len(results) + 1,
+                                place_id=place_id,
+                                title=clean_title,
+                                link=item.url,
+                                location=item.snippet[:60] if item.snippet else None,
+                            )
+                        )
+                if results:
+                    return results[:limit]
+            except Exception:
+                pass
+
+        # 2. Fallback to Google Custom Search JSON API
         if not self.api_key or not self.cx:
             return []
 
