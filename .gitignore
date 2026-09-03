@@ -1,0 +1,52 @@
+# Python Bytecode & Packaging
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.env
+.venv/
+env/
+venv/
+
+# Testing & coverage
+.pytest_cache/
+htmlcov/
+.coverage
+.coverage.*
+
+# Cache & Local Data (Zero leak of personal query caches)
+data/
+*.db
+
+# macOS & Editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# 2nd Brain internal governance & task ledgers (private working state)
+VAULT.md
+decisions.md
+task_plan.md
+progress.md
+handoff.md
+FILE_MAP_INDEX.md
