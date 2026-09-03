@@ -101,6 +101,25 @@ tripadvisor-intel cache
 tripadvisor-intel cache --clear
 ```
 
+### Transport Selection & Zero-DataDome Egress
+
+`tripadvisor-intel` features an intelligent multi-tier transport architecture:
+- **`direct_api` (Default if no SerpApi key)**: Bypasses DataDome Web JS shields by communicating with TripAdvisor's internal mobile API. Zero marginal cost, zero API keys required, ultra-low latency (<200ms).
+- **`serpapi`**: Managed crawler cluster with automated CAPTCHA solving.
+- **`mock`**: Deterministic offline simulation for testing.
+
+You can explicitly specify the transport or enable residential proxy routing:
+```bash
+# Force direct internal API
+tripadvisor-intel search "Cat Ba" --transport direct_api
+
+# Route requests through residential proxy pool (DataImpulse via ultra-low-cost-scraper)
+tripadvisor-intel reviews 5979069 --transport direct_api --residential-proxy --geo us
+
+# Custom proxy URL
+tripadvisor-intel search "Tokyo" --proxy "http://user:pass@proxy.example.com:8080"
+```
+
 ---
 
 ## Python SDK Example
