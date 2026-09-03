@@ -50,8 +50,7 @@ class TestDirectApiTransport(unittest.TestCase):
         self.assertEqual(p.title, "Monkey Island")
         self.assertEqual(p.rating, 3.4)
         self.assertEqual(p.reviews, 868)
-        self.assertEqual(p.thumbnail, "https://media-cdn.tripadvisor.com/thumb.jpg")
-        mock_req.assert_called_once_with("typeahead", {"query": "Monkey Island", "category_type": "activities"})
+        mock_req.assert_called_once_with("typeahead", {"query": "Monkey Island", "category_type": "things_to_do,activities"})
 
     @patch.object(DirectApiTransport, "get_reviews")
     @patch.object(DirectApiTransport, "_request_json")

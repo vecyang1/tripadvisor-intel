@@ -31,13 +31,13 @@ CATEGORY_MAP = {
     "restaurant": "restaurants",
     "dining": "restaurants",
     "food": "restaurants",
-    "attractions": "activities",
-    "attraction": "activities",
+    "attractions": "things_to_do,activities",
+    "attraction": "things_to_do,activities",
     "activities": "activities",
-    "things_to_do": "activities",
+    "things_to_do": "things_to_do",
     "geos": "geos",
     "destinations": "geos",
-    "all": "activities",
+    "all": "lodging,restaurants,things_to_do,geos",
 }
 
 
