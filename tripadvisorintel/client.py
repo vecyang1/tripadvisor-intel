@@ -7,6 +7,8 @@ from .parsers import extract_place_id
 from .models import PlaceSummary, PlaceDetail, DossierReport, ReviewItem
 from .transports.base import BaseTransport
 from .transports.serpapi import SerpApiTransport
+from .transports.direct_api import DirectApiTransport
+from .config import serpapi_api_key
 from .cache import cache, CacheDB
 from .reasoning.engine import generate_dossier
 
@@ -18,9 +20,36 @@ class TripAdvisorClient:
         fallback_transport: Optional[BaseTransport] = None,
         cache_instance: Optional[CacheDB] = None,
         enable_llm: bool = True,
+        transport_mode: Optional[str] = None,
+        use_residential_proxy: bool = False,
+        proxy_url: Optional[str] = None,
+        geo: str = "us",
     ):
-        self.transport = transport or SerpApiTransport()
-        self.fallback_transport = fallback_transport
+        if transport is not None:
+            self.transport = transport
+            self.fallback_transport = fallback_transport
+        else:
+            has_serp = bool(serpapi_api_key())
+            # Mode selection:
+            # - "direct_api": Direct internal API (fast, free, no DataDome)
+            # - "serpapi": SerpApi managed solver
+            mode = transport_mode or ("serpapi" if has_serp else "direct_api")
+            
+            if mode == "direct_api":
+                self.transport = DirectApiTransport(
+                    proxy_url=proxy_url,
+                    use_residential_proxy=use_residential_proxy,
+                    geo=geo,
+                )
+                self.fallback_transport = fallback_transport or (SerpApiTransport() if has_serp else None)
+            else:
+                self.transport = SerpApiTransport()
+                self.fallback_transport = fallback_transport or DirectApiTransport(
+                    proxy_url=proxy_url,
+                    use_residential_proxy=use_residential_proxy,
+                    geo=geo,
+                )
+
         self.cache = cache_instance or cache
         self.enable_llm = enable_llm
 
