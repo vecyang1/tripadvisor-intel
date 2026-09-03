@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tripadvisor-intel"
+version = "1.0.0"
+description = "Agentic TripAdvisor data acquisition, structured extraction, and AI reasoning engine"
+readme = "README.md"
+authors = [{ name = "V" }]
+license = { text = "AGPL-3.0-or-later" }
+requires-python = ">=3.10"
+dependencies = [
+    "curl_cffi>=0.7.0",
+    "pydantic>=2.0.0",
+]
+
+[project.scripts]
+tripadvisor-intel = "tripadvisorintel.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["tripadvisorintel*"]
