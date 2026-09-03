@@ -292,11 +292,13 @@ def main() -> int:
         if args.json:
             out_str = json.dumps(doc_result, indent=2, ensure_ascii=False)
         else:
+            s_info = doc_result['keys']['serpapi']
+            s_str = f"✓ Configured ({s_info.get('pool_size', 1)}-key failover pool: {', '.join(s_info.get('masked_keys', []))})" if s_info.get('configured') else '✗ Missing'
             lines = [
                 "TripAdvisor Intel Diagnostic Report:",
                 f"  Overall Status:  {doc_result['status'].upper()}",
                 f"  Python Version:  {doc_result['python_version']}",
-                f"  SerpAPI Key:     {'✓ Configured (' + doc_result['keys']['serpapi'].get('masked', '') + ')' if doc_result['keys']['serpapi']['configured'] else '✗ Missing'}",
+                f"  SerpAPI Pool:    {s_str}",
             ]
             llm_k = doc_result['keys']['llm_reasoning']
             lines.append(f"  LLM Key:         {'✓ ' + llm_k.get('provider', '') + ' (' + llm_k.get('masked', '') + ')' if llm_k.get('configured') else '• Rule-based only'}")

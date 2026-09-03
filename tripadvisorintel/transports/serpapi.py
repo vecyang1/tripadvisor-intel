@@ -8,9 +8,8 @@ import urllib.parse
 import urllib.request
 from typing import List, Optional, Dict, Any, Tuple
 from .base import BaseTransport
-from ..models import PlaceSummary, PlaceDetail, ReviewItem
 from ..parsers import parse_search_results, parse_place_details, parse_reviews_response
-from ..config import serpapi_api_key
+from ..config import serpapi_api_key, serpapi_api_keys
 
 
 CATEGORY_MAP = {
@@ -61,42 +60,78 @@ CATEGORY_MAP = {
 
 
 class SerpApiTransport(BaseTransport):
-    def __init__(self, api_key: Optional[str] = None, timeout: float = 45.0, retries: int = 2):
-        self.api_key = api_key or serpapi_api_key()
+    def __init__(
+        self,
+        api_key: Optional[str] = None,
+        api_keys: Optional[List[str]] = None,
+        timeout: float = 45.0,
+        retries: int = 2,
+    ):
+        if api_keys:
+            self.keys = [k for k in api_keys if k]
+        elif api_key:
+            self.keys = [api_key]
+        else:
+            self.keys = serpapi_api_keys() or ([serpapi_api_key()] if serpapi_api_key() else [])
+
+        self.current_key_idx = 0
         self.timeout = timeout
         self.retries = retries
 
+    @property
+    def api_key(self) -> Optional[str]:
+        if not self.keys:
+            return None
+        return self.keys[self.current_key_idx % len(self.keys)]
+
+    def _rotate_key(self) -> bool:
+        """Rotate to next available key in the pool. Returns True if rotated, False if pool exhausted."""
+        if len(self.keys) <= 1:
+            return False
+        old_idx = self.current_key_idx
+        self.current_key_idx = (self.current_key_idx + 1) % len(self.keys)
+        import sys
+        sys.stderr.write(f"[SerpApi Pool] Rotated key #{old_idx + 1} -> #{self.current_key_idx + 1} of {len(self.keys)}\n")
+        return True
+
     def _ensure_key(self) -> str:
-        if not self.api_key:
+        k = self.api_key
+        if not k:
             raise RuntimeError(
                 "SerpAPI key not found. Please set SERPAPI_API_KEY environment variable "
                 "or place it in .env"
             )
-        return self.api_key
+        return k
 
     def _get_json(self, params: Dict[str, Any]) -> Dict[str, Any]:
-        key = self._ensure_key()
-        params["api_key"] = key
-        query_str = urllib.parse.urlencode(params)
-        url = f"https://serpapi.com/search.json?{query_str}"
+        req_params = dict(params)
+        for attempt in range(self.retries + len(self.keys)):
+            key = self._ensure_key()
+            req_params["api_key"] = key
+            query_str = urllib.parse.urlencode(req_params)
+            url = f"https://serpapi.com/search.json?{query_str}"
 
-        req = urllib.request.Request(
-            url,
-            headers={
-                "User-Agent": "tripadvisor-intel/1.0.0 (+https://github.com/vecyang1)",
-                "Accept": "application/json",
-            }
-        )
-        for attempt in range(self.retries + 1):
+            req = urllib.request.Request(
+                url,
+                headers={
+                    "User-Agent": "tripadvisor-intel/1.0.0 (+https://github.com/vecyang1)",
+                    "Accept": "application/json",
+                }
+            )
             try:
                 with urllib.request.urlopen(req, timeout=self.timeout) as resp:
                     raw_bytes = resp.read()
                     data = json.loads(raw_bytes.decode("utf-8"))
                     if isinstance(data, dict) and "error" in data:
-                        raise RuntimeError(f"SerpAPI Error: {data['error']}")
+                        err_str = str(data["error"])
+                        if any(term in err_str.lower() for term in ["run out of searches", "monthly search limit", "invalid api key"]) and self._rotate_key():
+                            continue
+                        raise RuntimeError(f"SerpAPI Error: {err_str}")
                     return data
             except urllib.error.HTTPError as e:
                 err_body = e.read().decode("utf-8", errors="replace")
+                if (e.code in (401, 429) or any(term in err_body.lower() for term in ["run out of searches", "monthly search limit"])) and self._rotate_key():
+                    continue
                 raise RuntimeError(f"SerpAPI HTTP {e.code} Error: {err_body}") from e
             except (TimeoutError, urllib.error.URLError) as e:
                 if attempt < self.retries:
