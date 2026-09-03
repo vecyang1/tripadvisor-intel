@@ -7,6 +7,7 @@ import sys
 from typing import Dict, Any
 from .config import (
     serpapi_api_key,
+    serpapi_api_keys,
     vectorengine_api_key,
     google_api_key,
     DB_PATH,
@@ -27,10 +28,14 @@ def run_doctor(live: bool = False) -> Dict[str, Any]:
     }
 
     # 1. Check Keys
-    s_key = serpapi_api_key()
-    if s_key:
-        masked_s = f"{s_key[:4]}...{s_key[-4:]}" if len(s_key) > 8 else "***"
-        results["keys"]["serpapi"] = {"configured": True, "masked": masked_s}
+    s_keys = serpapi_api_keys()
+    if s_keys:
+        masked_list = [f"{k[:4]}...{k[-4:]}" for k in s_keys]
+        results["keys"]["serpapi"] = {
+            "configured": True,
+            "pool_size": len(s_keys),
+            "masked_keys": masked_list,
+        }
     else:
         results["keys"]["serpapi"] = {"configured": False, "note": "SERPAPI_API_KEY missing"}
         results["status"] = "degraded"
@@ -60,10 +65,10 @@ def run_doctor(live: bool = False) -> Dict[str, Any]:
         results["status"] = "unhealthy"
 
     # 3. Live check if requested
-    if live and s_key:
+    if live and s_keys:
         try:
             from .transports.serpapi import SerpApiTransport
-            transport = SerpApiTransport(api_key=s_key, timeout=10)
+            transport = SerpApiTransport(api_keys=s_keys, timeout=10)
             probe = transport.search_places("Hoi An", category="hotels", limit=1)
             results["checks"].append({
                 "name": "live_serpapi_probe",

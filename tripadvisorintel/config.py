@@ -35,7 +35,7 @@ def _parse_env_file(path: Path, key: str) -> Optional[str]:
 
 
 def serpapi_api_key() -> Optional[str]:
-    """Discover SerpAPI key from environment, project .env, or skill configs."""
+    """Discover primary SerpAPI key from environment, project .env, or skill configs."""
     # 1. Direct environment variable
     key = os.getenv("SERPAPI_API_KEY") or os.getenv("SERP_API_KEY")
     if key:
@@ -64,6 +64,36 @@ def serpapi_api_key() -> Optional[str]:
             pass
 
     return None
+
+
+def serpapi_api_keys() -> List[str]:
+    """Discover all SerpAPI keys from environment, .env, or multi-key pool."""
+    keys: List[str] = []
+    seen = set()
+
+    def _add(k: Optional[str]):
+        if k and k not in seen and len(k) > 10:
+            keys.append(k)
+            seen.add(k)
+
+    # 1. SERPAPI_API_KEYS (comma-separated env)
+    raw_env = os.getenv("SERPAPI_API_KEYS")
+    if raw_env:
+        for piece in raw_env.split(","):
+            _add(piece.strip())
+
+    # 2. Project-local .env
+    local_env = PROJECT_DIR / ".env"
+    if local_env.exists():
+        raw_local = _parse_env_file(local_env, "SERPAPI_API_KEYS")
+        if raw_local:
+            for piece in raw_local.split(","):
+                _add(piece.strip())
+
+    # 3. Primary discovered key
+    _add(serpapi_api_key())
+
+    return keys
 
 
 def google_api_key() -> Optional[str]:
@@ -111,3 +141,20 @@ CACHE_TTL_HOURS = int(os.getenv("TRIPADVISOR_CACHE_TTL_HOURS", "48"))  # 48 hour
 
 def ensure_dirs() -> None:
     DATA_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def google_search_credentials() -> Tuple[Optional[str], Optional[str]]:
+    """Discover Google Custom Search API key and CX engine ID."""
+    key = os.getenv("GOOGLE_SEARCH_API_KEY")
+    cx = os.getenv("GOOGLE_SEARCH_CX")
+    if key and cx:
+        return key, cx
+
+    local_env = PROJECT_DIR / ".env"
+    if local_env.exists():
+        k = _parse_env_file(local_env, "GOOGLE_SEARCH_API_KEY")
+        c = _parse_env_file(local_env, "GOOGLE_SEARCH_CX")
+        if k and c:
+            return k, c
+
+    return None, None

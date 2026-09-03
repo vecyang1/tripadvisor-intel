@@ -5,6 +5,7 @@ from .serpapi import SerpApiTransport
 from .mock import MockTransport
 from .direct import DirectScraperTransport
 from .direct_api import DirectApiTransport
+from .google_search import GoogleSearchResolver
 
 __all__ = [
     "BaseTransport",
@@ -12,4 +13,5 @@ __all__ = [
     "MockTransport",
     "DirectScraperTransport",
     "DirectApiTransport",
+    "GoogleSearchResolver",
 ]

@@ -17,6 +17,7 @@ from tests.test_cli import TestCLI
 from tests.test_mcp import TestMCPServer
 from tests.test_reviews import TestReviews
 from tests.test_direct_api import TestDirectApiTransport
+from tests.test_google_search import TestGoogleSearchResolver
 from tests.test_e2e_evolution import TestE2EEvolution
 
 
@@ -31,6 +32,7 @@ def suite():
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestMCPServer))
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestReviews))
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestDirectApiTransport))
+    s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestGoogleSearchResolver))
     s.addTests(unittest.defaultTestLoader.loadTestsFromTestCase(TestE2EEvolution))
     return s
 

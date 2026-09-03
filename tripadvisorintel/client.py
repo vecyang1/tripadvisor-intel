@@ -81,6 +81,16 @@ class TripAdvisorClient:
         results = self._execute_with_fallback(
             "search_places", query=query, category=category, domain=domain, limit=limit
         )
+
+        # Semantic URL/ID discovery fallback via Google Custom Search when enabled
+        if not results:
+            from .config import google_search_credentials
+            from .transports.google_search import GoogleSearchResolver
+            g_key, g_cx = google_search_credentials()
+            if g_key and g_cx:
+                resolver = GoogleSearchResolver(api_key=g_key, cx=g_cx)
+                results = resolver.search_tripadvisor(query=query, limit=limit)
+
         self.cache.set_search(
             query=query,
             category=category,
