@@ -139,6 +139,8 @@ class TripAdvisorClient:
 
             if new_in_batch:
                 self.cache.save_reviews(place_id=resolved_place_id, reviews=[r.model_dump() for r in new_in_batch])
+                if max_reviews > 20:
+                    print(f"  [Progress] Ingested offset {offset:>3}: +{len(new_in_batch)} reviews -> {len(all_reviews)}/{max_reviews} in SQLite", flush=True)
 
             if not next_token or len(batch) < batch_limit:
                 break
