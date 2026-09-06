@@ -42,34 +42,48 @@ class DirectScraperTransport(BaseTransport):
                     raise DataDomeBlockedError("DataDome CAPTCHA challenge detected via custom fetch command.")
                 raise RuntimeError(f"Custom fetch command failed: {res.stderr or res.stdout}")
             body = res.stdout
-        elif self.SCRAPER_CLI.exists():
-            cmd = [
-                "python3",
-                str(self.SCRAPER_CLI),
-                "fetch",
-                url,
-                "--geo",
-                self.geo,
-                "--raw",
-            ]
-            res = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
-            body = res.stdout
-            if "captcha-delivery.com" in body or "Please enable JS" in body or res.returncode != 0:
-                raise DataDomeBlockedError("TripAdvisor presented DataDome 403 challenge to residential proxy.")
         else:
-            # Fallback to local curl_cffi if available
+            body = None
             try:
-                from curl_cffi import requests
-                r = requests.get(url, impersonate="chrome120", timeout=30)
-                if r.status_code == 403 or "captcha-delivery.com" in r.text:
-                    raise DataDomeBlockedError("TripAdvisor 403 DataDome challenge detected.")
-                body = r.text
+                from ulcs import fetch_raw
+                body = fetch_raw(url, geo=self.geo, timeout=45)
             except ImportError:
-                raise RuntimeError("Neither ultra-low-cost-scraper nor curl_cffi is available.")
+                pass
             except Exception as e:
-                if isinstance(e, DataDomeBlockedError):
-                    raise
-                raise RuntimeError(f"Direct request failed: {e}") from e
+                err_str = str(e)
+                if "captcha-delivery.com" in err_str or "Please enable JS" in err_str:
+                    raise DataDomeBlockedError("TripAdvisor presented DataDome 403 challenge to residential proxy.")
+                raise
+
+            if body is None:
+                if self.SCRAPER_CLI.exists():
+                    cmd = [
+                        "python3",
+                        str(self.SCRAPER_CLI),
+                        "fetch",
+                        url,
+                        "--geo",
+                        self.geo,
+                        "--raw",
+                    ]
+                    res = subprocess.run(cmd, capture_output=True, text=True, timeout=45)
+                    body = res.stdout
+                    if "captcha-delivery.com" in body or "Please enable JS" in body or res.returncode != 0:
+                        raise DataDomeBlockedError("TripAdvisor presented DataDome 403 challenge to residential proxy.")
+                else:
+                    # Fallback to local curl_cffi if available
+                    try:
+                        from curl_cffi import requests
+                        r = requests.get(url, impersonate="chrome120", timeout=30)
+                        if r.status_code == 403 or "captcha-delivery.com" in r.text:
+                            raise DataDomeBlockedError("TripAdvisor 403 DataDome challenge detected.")
+                        body = r.text
+                    except ImportError:
+                        raise RuntimeError("Neither ultra-low-cost-scraper nor curl_cffi is available.")
+                    except Exception as e:
+                        if isinstance(e, DataDomeBlockedError):
+                            raise
+                        raise RuntimeError(f"Direct request failed: {e}") from e
 
         if "captcha-delivery.com" in body or "Please enable JS" in body:
             raise DataDomeBlockedError("TripAdvisor presented DataDome challenge.")
