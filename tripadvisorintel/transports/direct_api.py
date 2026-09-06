@@ -42,7 +42,12 @@ CATEGORY_MAP = {
 
 
 def _resolve_residential_proxy(geo: Optional[str] = "us") -> Optional[str]:
-    """Attempt to resolve user residential proxy from ultra-low-cost-scraper."""
+    """Attempt to resolve user residential proxy from ulcs or legacy ultra-low-cost-scraper."""
+    try:
+        from ulcs.proxy import resolve_proxy_url
+        return resolve_proxy_url(geo=geo)
+    except ImportError:
+        pass
     try:
         scraper_paths = [
             "/Users/vecsatfoxmailcom/.gemini/config/skills/ultra-low-cost-scraper/scripts",
