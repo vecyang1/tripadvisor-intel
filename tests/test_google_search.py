@@ -4,7 +4,7 @@ import unittest
 from unittest.mock import patch, MagicMock
 
 # Ensure agent-search-sdk is discoverable
-SDK_PATH = "agent-search-sdk"
+SDK_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "26.09.03-agent-search-sdk"))
 if os.path.exists(SDK_PATH) and SDK_PATH not in sys.path:
     sys.path.insert(0, SDK_PATH)
 

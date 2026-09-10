@@ -43,10 +43,18 @@ data/
 *.swp
 *.swo
 
-# workspace internal governance & task ledgers (private working state)
+# Internal governance & task ledgers (private working state)
 VAULT.md
 decisions.md
 task_plan.md
 progress.md
 handoff.md
 FILE_MAP_INDEX.md
+PROJECT_LINKS.md
+AGENTS.md
+CLAUDE.md
+GEMINI.md
+CODEX.md
+MEMORY.md
+operations/
+vault/

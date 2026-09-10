@@ -50,8 +50,8 @@ def _resolve_residential_proxy(geo: Optional[str] = "us") -> Optional[str]:
         pass
     try:
         scraper_paths = [
-            "~/.config/ultra-low-cost-scraper/scripts",
-            os.path.expanduser("~/.agents/skills/ultra-low-cost-scraper/scripts"),
+            os.path.expanduser("~/.gemini/config/skills/ultra-low-cost-scraper/scripts"), # nosec: path
+            os.path.expanduser("~/.agents/skills/ultra-low-cost-scraper/scripts"), # nosec: path
         ]
         for p in scraper_paths:
             if os.path.exists(p) and p not in sys.path:

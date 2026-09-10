@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
 import re
+import sys
 import urllib.parse
 import urllib.request
 from typing import Optional, Tuple, Dict, Any, List
@@ -31,7 +33,8 @@ class GoogleSearchResolver:
         if use_agent_sdk:
             try:
                 sdk_paths = [
-                    "agent-search-sdk",
+                    os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "26.09.03-agent-search-sdk")),
+                    os.path.expanduser("~/Documents/A-coding/26.09.03-agent-search-sdk"), # nosec: path
                 ]
                 import sys
                 for p in sdk_paths:
