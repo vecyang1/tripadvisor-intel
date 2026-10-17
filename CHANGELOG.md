@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2026-10-04
+
+### Features
+- Integrate ulcs residential resolver with in-process fetch fallback (`f054bdc`)
+- Integrate agent-search-sdk discovery and fix mobile api category mapping (`5a6026c`)
+- Add GoogleSearchResolver for semantic URL/ID discovery and SerpApi multi-key rotation pool (`4a5381f`)
+- Add DirectApiTransport bypassing DataDome with residential proxy support (`3ab569f`)
+- Add 800-review stress test suite and progressive ingestion reporter (`9d9ea37`)
+
+### Fixes
+- Stub search_sdk module for CI environment and allow degraded doctor status without keys (`675fdea`)
+
+### Maintenance
+- Sanitize local machine paths and workspace tokens per github-ops gates (`05b60d4`)
+- Add uv.lock (`ddad23b`)
+- Add comprehensive evolution E2E test suite covering pagination, fallback, and MCP tools (`9a0602b`)
+
 ## [1.1.0] - 2026-09-03
 
 ### Added
