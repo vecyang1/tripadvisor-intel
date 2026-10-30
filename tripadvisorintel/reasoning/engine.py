@@ -70,8 +70,8 @@ def generate_dossier(place: PlaceDetail, enable_llm: bool = True) -> DossierRepo
             key_weaknesses = list(dict.fromkeys(llm_data["key_weaknesses"] + key_weaknesses))
 
         # Enrich persona fits if available
-        if llm_data.get("nomad_verdict") and "solo_nomad" in persona_fits:
-            persona_fits["solo_nomad"].recommendation = llm_data["nomad_verdict"]
+        if llm_data.get("remote_verdict") and "solo_remote" in persona_fits:
+            persona_fits["solo_remote"].recommendation = llm_data["remote_verdict"]
         if llm_data.get("couple_verdict") and "couples" in persona_fits:
             persona_fits["couples"].recommendation = llm_data["couple_verdict"]
 

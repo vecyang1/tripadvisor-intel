@@ -34,7 +34,7 @@ Provide a JSON object response with the following keys:
   "negotiation_baseline": "Actionable advice on target walk-in rates, direct discount margin vs OTA commissions, and what free perks/upgrades to request.",
   "key_strengths": ["3-4 bullet points of genuine standouts substantiated by reviews"],
   "key_weaknesses": ["2-3 recurring traveler grievances or trade-offs to be aware of"],
-  "nomad_verdict": "Specific advice for solo travelers / digital nomads (WiFi, noise, workspace).",
+  "remote_verdict": "Specific advice for solo travelers / remote workers (WiFi, noise, workspace).",
   "couple_verdict": "Specific advice for couples (ambiance, privacy, romance)."
 }}
 Respond ONLY with the JSON object.

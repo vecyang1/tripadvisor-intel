@@ -161,16 +161,16 @@ def evaluate_persona_fits(place: PlaceDetail, red_flags: Optional[List[RedFlagIt
     value = sub_map.get("value", place.rating or 4.0)
     sleep = sub_map.get("sleep quality", place.rating or 4.0)
 
-    # 1. Solo Digital Nomad
-    nomad_score = round(min(10.0, (cleanliness * 0.5 + location * 0.6 + sleep * 0.5 + value * 0.4)), 1)
-    nomad_pros = []
-    nomad_cons = []
+    # 1. Solo Remote Worker
+    remote_score = round(min(10.0, (cleanliness * 0.5 + location * 0.6 + sleep * 0.5 + value * 0.4)), 1)
+    remote_pros = []
+    remote_cons = []
     if location >= 4.5:
-        nomad_pros.append("High walkability / central location makes local cafe and dining hops effortless.")
+        remote_pros.append("High walkability / central location makes local cafe and dining hops effortless.")
     if sleep >= 4.5:
-        nomad_pros.append("High sleep score indicates quiet nights conducive to focused deep work.")
+        remote_pros.append("High sleep score indicates quiet nights conducive to focused deep work.")
     if value < 4.0:
-        nomad_cons.append("Value rating under 4.0★ makes it less viable for extended monthly stays.")
+        remote_cons.append("Value rating under 4.0★ makes it less viable for extended monthly stays.")
 
     # 2. Couples / Romance
     couple_score = round(min(10.0, (cleanliness * 0.6 + service * 0.6 + location * 0.5 + sleep * 0.3)), 1)
@@ -195,34 +195,34 @@ def evaluate_persona_fits(place: PlaceDetail, red_flags: Optional[List[RedFlagIt
         for rf in red_flags:
             cat = rf.category.lower()
             if cat == "cleanliness" and rf.severity == "high":
-                nomad_score = max(1.0, round(nomad_score - 2.0, 1))
+                remote_score = max(1.0, round(remote_score - 2.0, 1))
                 couple_score = max(1.0, round(couple_score - 3.0, 1))
                 family_score = max(1.0, round(family_score - 3.5, 1))
                 family_cons.append(f"Hygiene Risk: {rf.description}")
             elif cat in ("noise", "wifi_and_connectivity") and rf.severity in ("high", "medium"):
-                nomad_score = max(1.0, round(nomad_score - 2.5, 1))
-                nomad_cons.append(f"Work Disruption: {rf.description}")
+                remote_score = max(1.0, round(remote_score - 2.5, 1))
+                remote_cons.append(f"Work Disruption: {rf.description}")
             elif cat == "food_and_hygiene":
                 family_score = max(1.0, round(family_score - 3.0, 1))
                 couple_score = max(1.0, round(couple_score - 2.0, 1))
                 family_cons.append(f"Culinary Warning: {rf.description}")
             elif cat in ("scam_and_billing", "bait_and_switch"):
                 couple_score = max(1.0, round(couple_score - 2.0, 1))
-                nomad_score = max(1.0, round(nomad_score - 1.5, 1))
+                remote_score = max(1.0, round(remote_score - 1.5, 1))
                 couple_cons.append(f"Trust Caveat: {rf.description}")
             elif cat == "infrastructure_failure" and rf.severity == "high":
-                nomad_score = max(1.0, round(nomad_score - 2.0, 1))
+                remote_score = max(1.0, round(remote_score - 2.0, 1))
                 couple_score = max(1.0, round(couple_score - 2.5, 1))
                 family_score = max(1.0, round(family_score - 2.5, 1))
-                nomad_cons.append(f"Amenity Outage: {rf.description}")
+                remote_cons.append(f"Amenity Outage: {rf.description}")
 
     # Recommendations based on final scores
-    if nomad_score >= 8.0:
-        nomad_rec = "Recommended for remote workers and solo travelers."
-    elif nomad_score >= 5.0:
-        nomad_rec = "Viable short stay, check desk setup and quietness."
+    if remote_score >= 8.0:
+        remote_rec = "Recommended for remote workers and solo travelers."
+    elif remote_score >= 5.0:
+        remote_rec = "Viable short stay, check desk setup and quietness."
     else:
-        nomad_rec = "Caution advised for remote work: Low hygiene, poor sleep, noise, or Wi-Fi deficits."
+        remote_rec = "Caution advised for remote work: Low hygiene, poor sleep, noise, or Wi-Fi deficits."
 
     if couple_score >= 8.5:
         couple_rec = "Prime pick for couples seeking relaxation and pampering."
@@ -239,7 +239,7 @@ def evaluate_persona_fits(place: PlaceDetail, red_flags: Optional[List[RedFlagIt
         family_rec = "Caution advised for families: Cleanliness, food hygiene, or safety falls below family standards."
 
     return {
-        "solo_nomad": PersonaFitScore(persona="solo_nomad", score=nomad_score, pros=nomad_pros, cons=nomad_cons, recommendation=nomad_rec),
+        "solo_remote": PersonaFitScore(persona="solo_remote", score=remote_score, pros=remote_pros, cons=remote_cons, recommendation=remote_rec),
         "couples": PersonaFitScore(persona="couples", score=couple_score, pros=couple_pros, cons=couple_cons, recommendation=couple_rec),
         "family": PersonaFitScore(persona="family", score=family_score, pros=family_pros, cons=family_cons, recommendation=family_rec),
     }

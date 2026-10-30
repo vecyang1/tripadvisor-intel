@@ -45,7 +45,7 @@ class TestCache(unittest.TestCase):
 
     def test_report_cache(self):
         place_id = "98765"
-        persona = "solo_nomad"
+        persona = "solo_remote"
         payload = {"place_id": place_id, "walk_in_brief": "Great spot for laptop work."}
 
         self.assertIsNone(self.cache.get_report(place_id, persona))

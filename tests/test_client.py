@@ -43,7 +43,7 @@ class TestClient(unittest.TestCase):
         self.assertEqual(dossier.place_id, "12345")
         self.assertEqual(dossier.name, "Mock Royal Heritage Hotel")
         self.assertIsNotNone(dossier.walk_in_brief)
-        self.assertIn("solo_nomad", dossier.persona_fits)
+        self.assertIn("solo_remote", dossier.persona_fits)
         self.assertIn("couples", dossier.persona_fits)
         self.assertIn("family", dossier.persona_fits)
 

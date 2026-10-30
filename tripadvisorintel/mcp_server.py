@@ -117,7 +117,7 @@ TOOL_DEFINITIONS = [
             "properties": {
                 "target": {"type": "string", "description": "TripAdvisor place ID, full TripAdvisor URL, or business name"},
                 "category": {"type": "string", "default": "all"},
-                "persona": {"type": "string", "enum": ["solo_nomad", "couples", "family", "general"], "default": "general"},
+                "persona": {"type": "string", "enum": ["solo_remote", "couples", "family", "general"], "default": "general"},
                 "reviews_pages": {"type": "integer", "default": 1, "description": "Number of review pages to load for deep audit"},
                 "max_reviews": {"type": "integer", "description": "Optional maximum reviews to paginate and evaluate (e.g. 50, 100, 800)"},
                 "domain": {"type": "string", "default": "www.tripadvisor.com"},

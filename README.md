@@ -10,7 +10,7 @@
 
 - **Anti-Bot Resilient Egress**: Built on SerpApi's managed TripAdvisor engines (`tripadvisor` & `tripadvisor_place`), bypassing DataDome challenges and TLS fingerprinting.
 - **Dual-Layer Reasoning Engine**:
-  - *Layer 1 (Algorithmic / Ground Truth)*: Value Discrepancy Index, Rank Dominance Percentile, Acute Red Flag Scanning (cleanliness, noise, billing scams, negative ratio), and Persona Scoring (Solo Nomad, Couples, Family).
+  - *Layer 1 (Algorithmic / Ground Truth)*: Value Discrepancy Index, Rank Dominance Percentile, Acute Red Flag Scanning (cleanliness, noise, billing scams, negative ratio), and Persona Scoring (Solo Remote, Couples, Family).
   - *Layer 2 (LLM Synthesis)*: Deep contextual synthesis powered by Gemini / VectorEngine with a strict **fail-open guarantee** (runs deterministically even when LLM is unavailable).
 - **SQLite Persistent Caching**: 48-hour TTL cache in `data/tripadvisor.db` for instant ($0 marginal cost) replays.
 - **Three Unified Surfaces**:
@@ -89,7 +89,7 @@ Generate deep reasoning, authenticity audit, red flag analysis, and negotiation 
 ```bash
 # By Place ID or URL (analyzing up to 100 reviews)
 tripadvisor-intel reason 7182682 --max-reviews 100
-tripadvisor-intel reason "https://www.tripadvisor.com/Restaurant_Review-g298082-d1121828-Reviews-Mango_Rooms-Hoi_An.html" --persona solo_nomad -o /tmp/mango_dossier.txt
+tripadvisor-intel reason "https://www.tripadvisor.com/Restaurant_Review-g298082-d1121828-Reviews-Mango_Rooms-Hoi_An.html" --persona solo_remote -o /tmp/mango_dossier.txt
 
 # By Name search
 tripadvisor-intel reason "Hotel Royal Hoi An" --persona couples --json
@@ -144,10 +144,10 @@ reviews = client.get_reviews("7182682", max_reviews=100)
 print(f"Loaded {len(reviews)} reviews from cache or API")
 
 # 4. Generate Intelligence Dossier
-dossier = client.analyze("7182682", persona="solo_nomad", max_reviews=100)
+dossier = client.analyze("7182682", persona="solo_remote", max_reviews=100)
 print("Authenticity Score:", dossier.authenticity_score)
 print("Walk-in Brief:", dossier.walk_in_brief)
-print("Nomad Score:", dossier.persona_fits["solo_nomad"].score)
+print("Remote Score:", dossier.persona_fits["solo_remote"].score)
 print("Red Flags:", [f.description for f in dossier.red_flags])
 ```
 

@@ -90,7 +90,7 @@ class TestRules(unittest.TestCase):
     def test_persona_fits(self):
         place = PlaceDetail(
             place_id="5",
-            name="Central Nomad Oasis",
+            name="Central Remote Oasis",
             rating=4.7,
             subratings=[
                 Subrating(category="Location", score=4.9),
@@ -102,10 +102,10 @@ class TestRules(unittest.TestCase):
             walk_score=95,
         )
         fits = evaluate_persona_fits(place)
-        self.assertIn("solo_nomad", fits)
+        self.assertIn("solo_remote", fits)
         self.assertIn("couples", fits)
         self.assertIn("family", fits)
-        self.assertGreaterEqual(fits["solo_nomad"].score, 8.0)
+        self.assertGreaterEqual(fits["solo_remote"].score, 8.0)
 
     def test_adversarial_red_flags(self):
         """Verify capture of food poisoning, bait & switch, Wi-Fi outage, AC failure, and bribery."""
@@ -146,9 +146,9 @@ class TestRules(unittest.TestCase):
 
         # Test that persona penalties trigger properly
         fits = evaluate_persona_fits(place, red_flags=flags)
-        # Nomad score should be penalized for wifi & infrastructure
-        self.assertLessEqual(fits["solo_nomad"].score, 6.0)
-        self.assertTrue(any("Work Disruption" in c for c in fits["solo_nomad"].cons))
+        # Remote score should be penalized for wifi & infrastructure
+        self.assertLessEqual(fits["solo_remote"].score, 6.0)
+        self.assertTrue(any("Work Disruption" in c for c in fits["solo_remote"].cons))
         # Family score should be penalized for food poisoning
         self.assertTrue(any("Culinary Warning" in c for c in fits["family"].cons))
 

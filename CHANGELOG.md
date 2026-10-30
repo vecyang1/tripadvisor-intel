@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-10-19] - 2026-10-19
+
+### Maintenance
+- Enforce GitHub Actions quota hygiene (ubuntu-latest default, concurrency, paths-ignore) (`f686698`)
+
 ## [1.2.0] - 2026-10-04
 
 ### Features
@@ -51,7 +56,7 @@ All notable changes to this project will be documented in this file.
 - **Reasoning Engine**:
   - Value Discrepancy Index auditing property rating vs Value subrating.
   - Acute Red Flag regex scanner covering cleanliness, noise, scams/billing, and safety.
-  - Multi-persona suitability evaluation (Solo Nomad, Couples, Family).
+  - Multi-persona suitability evaluation (Solo Remote, Couples, Family).
   - Optional fail-open Gemini / VectorEngine LLM natural language synthesis.
   - Actionable walk-in brief and negotiation baseline generation.
 - **Surfaces**:

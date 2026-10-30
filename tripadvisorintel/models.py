@@ -107,7 +107,7 @@ class PlaceDetail(BaseModel):
 
 
 class PersonaFitScore(BaseModel):
-    persona: str  # e.g., "solo_nomad", "couples", "family", "budget_backpacker"
+    persona: str  # e.g., "solo_remote", "couples", "family", "budget_backpacker"
     score: float  # 0.0 to 10.0
     pros: List[str] = Field(default_factory=list)
     cons: List[str] = Field(default_factory=list)
