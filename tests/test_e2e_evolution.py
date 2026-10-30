@@ -1,6 +1,7 @@
 """End-to-end integration tests covering core deliverables and evolution highlights."""
 
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -21,7 +22,7 @@ from tripadvisorintel.transports.direct import DirectScraperTransport, DataDomeB
 class TestE2EEvolution(unittest.TestCase):
     def setUp(self):
         self.temp_dir = tempfile.TemporaryDirectory()
-        self.db_path = Path(self.temp_dir.name) / "e2e_test.db"
+        self.db_path = Path(self.temp_dir.name) / "tripadvisor.db"
         self.cache = CacheDB(db_path=self.db_path)
 
     def tearDown(self):
@@ -116,14 +117,20 @@ class TestE2EEvolution(unittest.TestCase):
         """Execute CLI binary across subcommands and verify exit codes and output contracts."""
         cli_bin = root / "bin" / "tripadvisor-intel"
 
+        # Seed cache for place 5979069 so reviews are served deterministically from cache
+        self.cache.save_reviews("5979069", [
+            {"review_id": "rev_seed_1", "rating": 5.0, "title": "Great Monkey Island", "snippet": "Wonderful trip", "date": "2026-08-15"}
+        ])
+        env = {**os.environ, "TRIPADVISOR_DATA_DIR": self.temp_dir.name}
+
         # 1. Doctor command
-        res_doc = subprocess.run([sys.executable, str(cli_bin), "doctor", "--json"], capture_output=True, text=True)
+        res_doc = subprocess.run([sys.executable, str(cli_bin), "doctor", "--json"], capture_output=True, text=True, env=env)
         self.assertEqual(res_doc.returncode, 0)
         doc_json = json.loads(res_doc.stdout)
         self.assertIn("status", doc_json)
 
         # 2. Cache stats command
-        res_cache = subprocess.run([sys.executable, str(cli_bin), "cache", "--json"], capture_output=True, text=True)
+        res_cache = subprocess.run([sys.executable, str(cli_bin), "cache", "--json"], capture_output=True, text=True, env=env)
         self.assertEqual(res_cache.returncode, 0)
         cache_json = json.loads(res_cache.stdout)
         self.assertIn("db_size_bytes", cache_json)
@@ -133,6 +140,7 @@ class TestE2EEvolution(unittest.TestCase):
             [sys.executable, str(cli_bin), "reviews", "5979069", "--max-reviews", "5", "--json"],
             capture_output=True,
             text=True,
+            env=env,
         )
         self.assertEqual(res_rev.returncode, 0)
         rev_json = json.loads(res_rev.stdout)
@@ -143,6 +151,12 @@ class TestE2EEvolution(unittest.TestCase):
         """Execute FastMCP JSON-RPC server and verify tools/list and tools/call for all 4 tools."""
         mcp_script = root / "tripadvisorintel" / "mcp_server.py"
 
+        # Seed cache for place 5979069 so reviews are served deterministically from cache
+        self.cache.save_reviews("5979069", [
+            {"review_id": "rev_seed_1", "rating": 5.0, "title": "Great Monkey Island", "snippet": "Wonderful trip", "date": "2026-08-15"}
+        ])
+        env = {**os.environ, "TRIPADVISOR_DATA_DIR": self.temp_dir.name}
+
         # Start stdio process
         proc = subprocess.Popen(
             [sys.executable, str(mcp_script)],
@@ -150,6 +164,7 @@ class TestE2EEvolution(unittest.TestCase):
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             text=True,
+            env=env,
         )
 
         def send_rpc(req_dict):

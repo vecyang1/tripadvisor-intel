@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [2026-10-30] - 2026-10-30
+
+### Fixed
+- Ensure hermetic SQLite cache seeding and `TRIPADVISOR_DATA_DIR` isolation in E2E CLI and MCP subprocess tests, preventing test failures in headless CI runners without live network keys.
+
 ## [2026-10-19] - 2026-10-19
 
 ### Maintenance
