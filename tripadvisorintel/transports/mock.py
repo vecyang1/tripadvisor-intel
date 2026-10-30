@@ -64,7 +64,7 @@ class MockTransport(BaseTransport):
                     snippet="Loved the pool and breakfast. Great quiet work desk in room. Aircon cold and quiet.",
                     rating=5.0,
                     date="2026-08-15",
-                    author=ReviewAuthor(username="TravelerNomad", hometown="London, UK", contributions=45),
+                    author=ReviewAuthor(username="GlobalTraveler", hometown="London, UK", contributions=45),
                 ),
                 ReviewItem(
                     title="A bit pricey for laundry",
