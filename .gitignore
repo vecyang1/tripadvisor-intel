@@ -58,3 +58,10 @@ CODEX.md
 MEMORY.md
 operations/
 vault/
+
+# Security, Private Workspaces & Agent Constitutions
+graphify-out/
+.env.*
+!.env.example
+!.env.sample
+!.env.template
