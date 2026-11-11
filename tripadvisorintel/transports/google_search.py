@@ -34,7 +34,7 @@ class GoogleSearchResolver:
             try:
                 sdk_paths = [
                     os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..", "26.09.03-agent-search-sdk")),
-                    os.path.expanduser("~/Documents/A-coding/26.09.03-agent-search-sdk"), # nosec: path
+                    os.path.expanduser("./"), # nosec: path
                 ]
                 import sys
                 for p in sdk_paths:
